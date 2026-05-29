@@ -1,6 +1,6 @@
 ﻿# CI_FIRST_RUN
 
-status: PENDING
+status: PASS
 
 ## Context
 - workflow: integration-optional
@@ -14,10 +14,10 @@ status: PENDING
 - max_log_rows: 40
 
 ## Result
-- workflow_url: 
-- run_id: 
-- commit_sha: 
-- conclusion: 
+- workflow_url: https://github.com/erjifeng2019-ship-it/AI-LD/actions/runs/26620473613
+- run_id: 26620473613
+- commit_sha: 2512ecc6bf7f205d448c29995907d39d3eeafa5d
+- conclusion: success
 
 ## Artifacts
 - docs/NETWORK_ACCEPTANCE_2026-05-29.md
@@ -25,4 +25,4 @@ status: PENDING
 - data/briefings/latest.md
 
 ## Notes
-- Workflow dispatch failed. Check gh auth / repo permission.
+- Workflow completed successfully.

@@ -57,13 +57,13 @@
 - [x] `GET /ui` 页面校验包含 `CI First Run` 面板（页面内容检查通过）
 - [x] `.\run_all.ps1 -Date 2026-05-28 -SkipValidate -StopApiBeforeRun`（全链路成功）
 - [x] `python -m ai_chain_radar.cli export network-acceptance --date 2026-05-29 --target-date 2026-05-28 --max-log-rows 60`（`overall_pass=True`）
-- [x] `python -m ai_chain_radar.cli export v02-audit --date 2026-05-28`（`required_pass=14/15`，仅 CI 首轮 gate 未完成）
+- [x] `python -m ai_chain_radar.cli export v02-audit --date 2026-05-28`（`required_pass=15/15`，overall_pass=True）
 - [x] `.\scripts\close_v02.ps1 -Date 2026-05-28 -SkipValidate -StopApiBeforeRun`（一键收尾成功，产物齐全）
 - [x] `.\scripts\close_v02.ps1 -Date 2026-05-28 -SkipValidate -StopApiBeforeRun -DispatchCiFirstRun -CiDryRunOnly`（CI dry-run 链路成功）
 
 ## 下一步（继续自动推进）
-1. 在 CI secrets 完备后执行一次 workflow_dispatch，归档首轮 CI 产物与结论。
-2. 将首轮 CI 产物回填到 `docs/NETWORK_ACCEPTANCE_*.md` 与 `docs/DECISIONS.md`。
-3. 继续收敛剩余文档细节（以两份计划文档为准，不扩 scope）。
+1. 进入 v0.3 方向（J-Quants/更强全球锚点/告警）前的范围冻结与版本标记。
+2. 按需将 `integration-optional` 中 Node20 依赖升级到 Node24 兼容版本（当前为 GitHub 预警，不影响本次通过）。
+3. 持续执行日常闭环：`run_all -> network-acceptance -> v02-audit`。
 
-> 当前外部阻塞证据（本机）：`gh auth status` 返回未登录；已通过 `scripts/ci_first_run_dispatch.ps1` 固化到 `docs/CI_FIRST_RUN.md`。
+> 首轮 CI 真网验收已完成：`docs/CI_FIRST_RUN.md` 状态 PASS，run_id=26620473613，workflow_url 已回填。

@@ -36,3 +36,5 @@
 24. `v02-audit` 的 CI gate 收紧为“双条件”：`CI_FIRST_RUN.md` 中 `status: PASS` 且 `run_id/workflow_url` 留痕完整，避免仅改状态字段导致的误通过。
 25. `/ui` 增加 CI First Run 状态面板（仅展示已有文档字段，不新增公开 API），用于解释当前是否具备首轮 CI 真网验收证据。
 26. `/ui` 的 CI First Run 面板追加展示 `note` 字段（来自 `CI_FIRST_RUN.md` 的 Notes），用于直观看到阻塞原因（如 gh 未登录/仓库未解析）。
+27. 首轮 CI 真网留痕于 2026-05-29 完成：workflow run_id=26620473613，结论 success；`v02-audit` 达到 `required_pass=15/15`。
+28. 为保证 GitHub Actions 可执行 `pytest -m integration`，workflow 依赖安装改为 `uv sync --extra dev`，并修正 `pyproject.toml` 中 `httpx2` -> `httpx`。
