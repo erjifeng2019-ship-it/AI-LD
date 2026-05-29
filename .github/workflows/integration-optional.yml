@@ -50,7 +50,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: Sync dependencies
-        run: uv sync
+        run: uv sync --extra dev
 
       - name: Show credential availability
         run: |
