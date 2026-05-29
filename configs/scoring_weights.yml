@@ -1,0 +1,8 @@
+weights:
+  global_anchor_score: 0.20
+  bottleneck_score: 0.20
+  earnings_order_price_score: 0.15
+  a_share_mapping_score: 0.15
+  a_share_confirmation_score: 0.20
+  risk_adjustment: 0.10
+

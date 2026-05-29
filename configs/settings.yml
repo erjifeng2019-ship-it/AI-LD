@@ -1,0 +1,7 @@
+app_name: ai-chain-radar
+default_language: zh-CN
+timezone: Asia/Shanghai
+db_path: data/warehouse/ai_chain.duckdb
+raw_data_dir: data/raw
+briefing_dir: data/briefings
+

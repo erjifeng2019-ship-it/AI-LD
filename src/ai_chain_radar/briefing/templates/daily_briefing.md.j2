@@ -1,0 +1,79 @@
+# AI 产业链风口雷达日报 - {{ score_date }}
+
+## 1. 今日一句话结论
+- 总状态：{{ summary.status }}
+- 产业景气分：{{ summary.industry_score }}
+- A股交易确认分：{{ summary.confirmation_score }}
+- 拥挤度：{{ summary.crowding }}
+- 风险等级：{{ summary.risk_level }}
+
+## 2. 五条主线总览
+| 排名 | 主线 | 总分 | 阶段 | 产业景气 | A股确认 | 拥挤度 | 结论 |
+|---:|---|---:|---|---:|---:|---:|---|
+{% for row in top_segments -%}
+| {{ loop.index }} | {{ row.segment }} | {{ row.final_score }} | {{ row.stage }} | {{ row.industry_score }} | {{ row.a_share_confirmation_score }} | {{ row.crowding }} | {{ row.conclusion }} |
+{% endfor %}
+
+## 3. 当前最强主线
+{% for row in top_segments[:1] -%}
+- {{ row.segment }}：总分 {{ row.final_score }}，阶段 {{ row.stage }}。
+{% endfor %}
+
+## 4. 下一潜在风口
+| 环节 | 触发逻辑 | 全球地标 | A股映射 | 确认条件 | 反证 |
+|---|---|---|---|---|---|
+{% for row in watch_segments -%}
+| {{ row.segment }} | 海外锚点增强 + A股确认补强 | 见证据 | 见映射库 | 放量突破 | 量价背离 |
+{% endfor %}
+
+## 5. 今日新增证据
+{% for item in anchor_moves -%}
+- {{ item }}
+{% endfor %}
+
+## 6. A股盘面确认
+{% for row in top_segments -%}
+- {{ row.segment }}：确认分 {{ row.a_share_confirmation_score }}，阶段 {{ row.stage }}。
+{% endfor %}
+
+## 7. 反证与风险
+{% for risk in risks -%}
+- {{ risk }}
+{% endfor %}
+
+## 8. 昨日判断复盘
+- {{ review_summary }}
+{% if review_rows %}
+| 主线 | 原始阶段 | 原始分 | T+1 | T+3 | T+5 | 是否确认 |
+|---|---|---:|---:|---:|---:|---|
+{% for row in review_rows -%}
+| {{ row.segment }} | {{ row.original_stage }} | {{ row.original_score }} | {{ row.forward_return_1d }} | {{ row.forward_return_3d }} | {{ row.forward_return_5d }} | {{ row.was_confirmed }} |
+{% endfor %}
+{% endif %}
+
+## 9. 证据引用（evidence_id）
+{% if evidence_refs %}
+| evidence_id | source | claim |
+|---|---|---|
+{% for item in evidence_refs -%}
+| {{ item.evidence_id }} | {{ item.source }} | {{ item.message }} |
+{% endfor %}
+{% else %}
+- 暂无可引用 evidence_id，请先执行 `ai-chain extract evidence --date {{ score_date }}`。
+{% endif %}
+
+## 10. 证据质量摘要
+- 证据条目总数：{{ evidence_quality.total_items }}
+- 来源分布：
+{% for item in evidence_quality.source_breakdown -%}
+  - {{ item.name }}: {{ item.count }}
+{% endfor %}
+- 等级分布：
+{% for item in evidence_quality.level_breakdown -%}
+  - {{ item.name }}: {{ item.count }}
+{% endfor %}
+
+## 11. 明日观察清单
+1. 关注海外锚点是否继续跑赢基准。
+2. 关注 A股板块扩散是否出现放量共振。
+3. 关注高位拥挤后的分歧与修复节奏。

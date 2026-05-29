@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Chain Radar Dashboard</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #141b2d;
+        --text: #e7ecff;
+        --muted: #a3acc7;
+        --ok: #2ec27e;
+        --warn: #f4c542;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        margin: 0 0 14px;
+        font-size: 24px;
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      }
+      .panel {
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid #27304a;
+      }
+      .panel h2 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px dashed #2b3552;
+      }
+      .row:last-child {
+        border-bottom: 0;
+      }
+      .k {
+        color: var(--muted);
+      }
+      .v {
+        color: var(--text);
+        text-align: right;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 12px;
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin-left: 8px;
+      }
+      .ok {
+        background: rgba(46, 194, 126, 0.2);
+        color: var(--ok);
+      }
+      .warn {
+        background: rgba(244, 197, 66, 0.2);
+        color: var(--warn);
+      }
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.45;
+      }
+      .footer {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      small {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>
+        AI Chain Radar Dashboard
+        <span id="health" class="badge warn">checking</span>
+      </h1>
+      <div class="grid">
+        <section class="panel">
+          <h2>Source Status</h2>
+          <div id="source-status">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Credential Availability</h2>
+          <div id="cred-status">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Data Freshness</h2>
+          <div id="freshness">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>CI First Run</h2>
+          <div id="ci-first-run">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Review Summary</h2>
+          <div id="review-summary">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Review Trend (P/R)</h2>
+          <div id="review-trend">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Latest Scores</h2>
+          <div id="scores">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Latest Briefing</h2>
+          <pre id="brief">loading...</pre>
+        </section>
+        <section class="panel">
+          <h2>Segments</h2>
+          <div id="segments">loading...</div>
+        </section>
+        <section class="panel">
+          <h2>Anchors</h2>
+          <div id="anchors">loading...</div>
+        </section>
+      </div>
+      <div class="footer">Data from current FastAPI endpoints at runtime.</div>
+    </div>
+    <script>
+      const uiPayload = __UI_PAYLOAD__;
+
+      async function getJson(path) {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(path + " -> " + res.status);
+        return res.json();
+      }
+
+      function renderRows(el, rows, keyField, valueField) {
+        if (!rows || rows.length === 0) {
+          el.textContent = "empty";
+          return;
+        }
+        el.innerHTML = rows
+          .map(
+            (row) =>
+              `<div class="row"><span class="k">${row[keyField] ?? ""}</span><span class="v">${
+                row[valueField] ?? ""
+              }</span></div>`
+          )
+          .join("");
+      }
+
+      function renderSourceStatus(el, rows) {
+        if (!rows || rows.length === 0) {
+          el.textContent = "empty";
+          return;
+        }
+        el.innerHTML = rows
+          .map((row) => {
+            const core = `${row.status} (${row.rows_written}/${row.rows_read})`;
+            const reason = row.reason ? ` | ${row.reason}` : "";
+            return `<div class="row"><span class="k">${row.source}</span><span class="v">${core}${reason}</span></div>`;
+          })
+          .join("");
+      }
+
+      function renderCredentialStatus(el, data) {
+        const entries = Object.entries(data || {});
+        if (entries.length === 0) {
+          el.textContent = "empty";
+          return;
+        }
+        el.innerHTML = entries
+          .map(
+            ([key, available]) =>
+              `<div class="row"><span class="k">${key}</span><span class="v">${available ? "available" : "missing"}</span></div>`
+          )
+          .join("");
+      }
+
+      function renderFreshness(el, payload) {
+        const latestRunTime = payload.latest_run_time || "n/a";
+        const latestReviewDate = payload.latest_review_date || "n/a";
+        const counts = payload.source_counts || {};
+        el.innerHTML = [
+          `<div class="row"><span class="k">latest_run_time</span><span class="v">${latestRunTime}</span></div>`,
+          `<div class="row"><span class="k">latest_review_date</span><span class="v">${latestReviewDate}</span></div>`,
+          `<div class="row"><span class="k">source_ok/missing/failed</span><span class="v">${
+            (counts.ok ?? 0) + "/" + (counts.missing_credentials ?? 0) + "/" + (counts.failed ?? 0)
+          }</span></div>`,
+        ].join("");
+      }
+
+      function renderCiFirstRun(el, item) {
+        if (!item) {
+          el.textContent = "empty";
+          return;
+        }
+        const status = item.status || "MISSING";
+        const runId = item.run_id || "n/a";
+        const repo = item.repo || "n/a";
+        const reason = item.reason || "";
+        const note = item.note || "";
+        const workflow = item.workflow_url || "n/a";
+        el.innerHTML = [
+          `<div class="row"><span class="k">status</span><span class="v">${status}</span></div>`,
+          `<div class="row"><span class="k">repo</span><span class="v">${repo}</span></div>`,
+          `<div class="row"><span class="k">run_id</span><span class="v">${runId}</span></div>`,
+          `<div class="row"><span class="k">workflow_url</span><span class="v">${workflow}</span></div>`,
+          `<div class="row"><span class="k">reason</span><span class="v">${reason}</span></div>`,
+          `<div class="row"><span class="k">note</span><span class="v">${note || "n/a"}</span></div>`,
+        ].join("");
+      }
+
+      function renderReviewSummary(el, rows) {
+        if (!rows || rows.length === 0) {
+          el.textContent = "empty";
+          return;
+        }
+        el.innerHTML = rows
+          .slice(0, 8)
+          .map((row) => {
+            const p = Number(row.precision ?? 0).toFixed(2);
+            const r = Number(row.recall ?? 0).toFixed(2);
+            const n = row.sample_count ?? 0;
+            return `<div class="row"><span class="k">${row.segment}</span><span class="v">P/R ${p}/${r} (n=${n})</span></div>`;
+          })
+          .join("");
+      }
+
+      function renderReviewTrend(el, payload) {
+        const dates = payload.review_trend_dates || [];
+        const series = payload.review_trend_series || [];
+        if (dates.length === 0 || series.length === 0) {
+          el.textContent = "empty";
+          return;
+        }
+
+        const tailDates = dates.slice(-4);
+        const fmt = (v) => (v === null || v === undefined ? "--" : Number(v).toFixed(2));
+        el.innerHTML = series
+          .slice(0, 5)
+          .map((item) => {
+            const pTail = (item.precision || []).slice(-4).map(fmt).join(" / ");
+            const rTail = (item.recall || []).slice(-4).map(fmt).join(" / ");
+            return `<div class="row"><span class="k">${item.segment}<br><small>${tailDates.join(" | ")}</small></span><span class="v">P ${pTail}<br>R ${rTail}</span></div>`;
+          })
+          .join("");
+      }
+
+      (async function main() {
+        const healthEl = document.getElementById("health");
+        try {
+          await getJson("/health");
+          healthEl.textContent = "ok";
+          healthEl.className = "badge ok";
+        } catch {
+          healthEl.textContent = "down";
+          healthEl.className = "badge warn";
+        }
+
+        renderSourceStatus(document.getElementById("source-status"), uiPayload.source_status);
+        renderCredentialStatus(
+          document.getElementById("cred-status"),
+          uiPayload.credential_availability
+        );
+        renderFreshness(document.getElementById("freshness"), uiPayload);
+        renderCiFirstRun(document.getElementById("ci-first-run"), uiPayload.ci_first_run);
+        renderReviewSummary(document.getElementById("review-summary"), uiPayload.review_summary_rows);
+        renderReviewTrend(document.getElementById("review-trend"), uiPayload);
+
+        try {
+          const scores = await getJson("/scores/latest");
+          renderRows(document.getElementById("scores"), scores.slice(0, 8), "segment", "final_score");
+        } catch (e) {
+          document.getElementById("scores").textContent = String(e);
+        }
+
+        try {
+          const brief = await getJson("/briefings/latest");
+          const text = brief.global_chain_conclusion || JSON.stringify(brief, null, 2);
+          document.getElementById("brief").textContent = text;
+        } catch (e) {
+          document.getElementById("brief").textContent = String(e);
+        }
+
+        try {
+          const segments = await getJson("/segments");
+          renderRows(
+            document.getElementById("segments"),
+            segments.slice(0, 10),
+            "segment_id",
+            "segment_name"
+          );
+        } catch (e) {
+          document.getElementById("segments").textContent = String(e);
+        }
+
+        try {
+          const anchors = await getJson("/anchors");
+          renderRows(document.getElementById("anchors"), anchors.slice(0, 10), "symbol", "company_name");
+        } catch (e) {
+          document.getElementById("anchors").textContent = String(e);
+        }
+      })();
+    </script>
+  </body>
+</html>

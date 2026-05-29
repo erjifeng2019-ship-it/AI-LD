@@ -1,0 +1,107 @@
+name: integration-optional
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_pipeline:
+        description: "Run source sync + score + brief before acceptance export"
+        required: false
+        type: boolean
+        default: true
+      target_date:
+        description: "Business date (YYYY-MM-DD); default is yesterday UTC"
+        required: false
+        type: string
+        default: ""
+      acceptance_date:
+        description: "Acceptance doc date (YYYY-MM-DD); default is today UTC"
+        required: false
+        type: string
+        default: ""
+      max_log_rows:
+        description: "Max source_run_log rows to render in acceptance doc"
+        required: false
+        type: number
+        default: 40
+  schedule:
+    - cron: "0 1 * * 1"
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      AI_CHAIN_ENV: ci
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+      FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+      SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+      OPENDART_API_KEY: ${{ secrets.OPENDART_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Show credential availability
+        run: |
+          python - <<'PY'
+          import os
+          keys = ["TUSHARE_TOKEN", "FINMIND_TOKEN", "SEC_USER_AGENT", "OPENDART_API_KEY"]
+          for key in keys:
+              print(f"{key}={'available' if bool(os.getenv(key)) else 'missing'}")
+          PY
+
+      - name: Run integration tests
+        run: uv run pytest -m integration -rs
+
+      - name: Resolve acceptance dates
+        run: |
+          TARGET_DATE="${{ inputs.target_date }}"
+          ACCEPTANCE_DATE="${{ inputs.acceptance_date }}"
+          if [ -z "${TARGET_DATE}" ]; then
+            TARGET_DATE="$(date -u -d 'yesterday' +%F)"
+          fi
+          if [ -z "${ACCEPTANCE_DATE}" ]; then
+            ACCEPTANCE_DATE="$(date -u +%F)"
+          fi
+          echo "TARGET_DATE=${TARGET_DATE}" >> "$GITHUB_ENV"
+          echo "ACCEPTANCE_DATE=${ACCEPTANCE_DATE}" >> "$GITHUB_ENV"
+          echo "Resolved TARGET_DATE=${TARGET_DATE}, ACCEPTANCE_DATE=${ACCEPTANCE_DATE}"
+
+      - name: Run CI acceptance pipeline and export report
+        env:
+          RUN_PIPELINE: ${{ inputs.run_pipeline || github.event_name == 'schedule' }}
+          MAX_LOG_ROWS: ${{ inputs.max_log_rows || 40 }}
+          REVIEWER: GitHub Actions
+        run: |
+          chmod +x scripts/run_ci_acceptance.sh
+          ./scripts/run_ci_acceptance.sh
+
+      - name: Upload acceptance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-chain-acceptance-${{ env.ACCEPTANCE_DATE }}
+          path: |
+            docs/NETWORK_ACCEPTANCE_${{ env.ACCEPTANCE_DATE }}.md
+            data/briefings/${{ env.TARGET_DATE }}.md
+            data/briefings/latest.md
+          if-no-files-found: warn
+
+      - name: Publish workflow summary
+        run: |
+          echo "## integration-optional acceptance summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- TARGET_DATE: \`${TARGET_DATE}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ACCEPTANCE_DATE: \`${ACCEPTANCE_DATE}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- run_pipeline: \`${{ inputs.run_pipeline || github.event_name == 'schedule' }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- acceptance doc: \`docs/NETWORK_ACCEPTANCE_${ACCEPTANCE_DATE}.md\`" >> "$GITHUB_STEP_SUMMARY"

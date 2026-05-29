@@ -1,0 +1,44 @@
+anchors:
+  - symbol: NVDA
+    market: US
+    company_name: NVIDIA
+    country: US
+    chain_segment: hbm_storage
+    is_core_anchor: true
+  - symbol: MU
+    market: US
+    company_name: Micron
+    country: US
+    chain_segment: hbm_storage
+    is_core_anchor: true
+  - symbol: TSMC
+    market: TW
+    company_name: Taiwan Semiconductor
+    country: TW
+    chain_segment: cowos_advanced_packaging
+    is_core_anchor: true
+  - symbol: ASE
+    market: TW
+    company_name: ASE Technology
+    country: TW
+    chain_segment: cowos_advanced_packaging
+    is_core_anchor: true
+  - symbol: COHR
+    market: US
+    company_name: Coherent
+    country: US
+    chain_segment: optics_cpo_16t
+    is_core_anchor: true
+  - symbol: LITE
+    market: US
+    company_name: Lumentum
+    country: US
+    chain_segment: optics_cpo_16t
+    is_core_anchor: true
+  - symbol: VRT
+    market: US
+    company_name: Vertiv
+    country: US
+    chain_segment: liquid_cooling_power
+    is_core_anchor: true
+

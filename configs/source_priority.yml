@@ -1,0 +1,9 @@
+sources:
+  - tushare
+  - finmind
+  - sec
+  - opendart
+  - jquants
+  - fred
+  - dbnomics
+

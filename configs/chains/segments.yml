@@ -1,0 +1,71 @@
+segments:
+  - id: hbm_storage
+    name: HBM / 存储 / HBM4
+    parent: L2
+    description: 高带宽存储及相关产业链。
+    global_anchors: [MU, SK_hynix, Samsung_Electronics]
+    a_share_segments: [存储, 模组, DDR5配套]
+    positive_keywords: [HBM, HBM4, capacity constrained, backlog]
+    negative_keywords: [inventory correction, pricing pressure]
+    confirmation_rules:
+      - 韩国存储龙头强于本国指数
+      - A股相关标的放量突破
+    invalidation_rules:
+      - 海外锚点转弱且A股冲高回落
+
+  - id: cowos_advanced_packaging
+    name: CoWoS / 先进封装 / 封装材料
+    parent: L4
+    description: 先进封装工艺与材料及配套设备链。
+    global_anchors: [TSMC, ASE, Amkor, Ibiden, Shinko]
+    a_share_segments: [先进封装, 封测, 载板]
+    positive_keywords: [CoWoS, advanced packaging, qualification]
+    negative_keywords: [customer delay, supply disruption]
+    confirmation_rules:
+      - 海外封装链相对强势
+      - A股封测与载板共振
+    invalidation_rules:
+      - A股仅单一龙头独涨
+
+  - id: optics_cpo_16t
+    name: 1.6T 光模块 / CPO / 硅光
+    parent: L8
+    description: 光通信升级与硅光生态。
+    global_anchors: [COHR, LITE, AVGO, MRVL, ANET]
+    a_share_segments: [光模块, 光芯片, 激光器]
+    positive_keywords: [1.6T, CPO, silicon photonics]
+    negative_keywords: [demand softness, margin decline]
+    confirmation_rules:
+      - 海外光通信锚点相对强势
+      - A股上游器件扩散
+    invalidation_rules:
+      - 上游放量失败并伴随回落
+
+  - id: pcb_connector
+    name: 高速 PCB / 低损耗 CCL / 连接器
+    parent: L9
+    description: AI 服务器互连相关硬件链。
+    global_anchors: [Unimicron, Kinsus, Ibiden, Lotes, Fujikura]
+    a_share_segments: [PCB, CCL, 连接器]
+    positive_keywords: [high-speed, low-loss]
+    negative_keywords: [pricing pressure]
+    confirmation_rules:
+      - 板块内多股共振
+      - 成交额持续放大
+    invalidation_rules:
+      - 仅题材轮动无订单证据
+
+  - id: liquid_cooling_power
+    name: 液冷 / 数据中心电力
+    parent: L10
+    description: 数据中心基础设施与供电冷却链。
+    global_anchors: [VRT, Delta, Schneider, Eaton]
+    a_share_segments: [液冷, UPS, 变压器, 温控]
+    positive_keywords: [liquid cooling, data center power]
+    negative_keywords: [customer delay, demand softness]
+    confirmation_rules:
+      - 海外电力冷却锚点维持强势
+      - A股低位补涨扩散明显
+    invalidation_rules:
+      - 资金快速撤退且无基本面跟进
+
